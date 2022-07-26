@@ -35,9 +35,9 @@ class QuadEncoder:
 
         print(f"Timer is set to TIM{self.timer}")
 
-        self.af = self.af_table[self.timer]
-        self.ch_a = self.af_table[self.timer][0]
-        self.ch_b = self.af_table[self.timer][1]
+        self.af = self.af_table[self.timer][0]
+        self.ch_a = self.af_table[self.timer][1]
+        self.ch_b = self.af_table[self.timer][2]
 
         self.period = 65535
 
