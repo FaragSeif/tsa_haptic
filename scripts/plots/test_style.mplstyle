@@ -1,0 +1,26 @@
+## axes.titlesize : 24
+## axes.labelsize : 20
+## lines.linewidth : 3
+## lines.markersize : 10
+## xtick.labelsize : 16
+## ytick.labelsize : 16
+
+# /// FONT AND TEXT ///
+font.size : 12
+font.family : serif
+text.usetex: True
+text.antialiased: True
+
+
+# /// GRID ///
+grid.linestyle : --      # solid
+grid.alpha : 0.8     # transparency, between 0.0 and 1.0
+grid.linewidth: 1.0     # in points
+#grid.color:     b0b0b0  # grid color
+
+# /// SAVE OPTIONS /// 
+savefig.format : png
+savefig.dpi : 300
+
+figure.autolayout : True
+
