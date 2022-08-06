@@ -1,4 +1,4 @@
-from config import *
+from params import *
 import numpy as np
 
 # //////////////////

@@ -7,14 +7,14 @@ from micropython import const
 # --------------------
 # Load cell amplifiers
 # --------------------
-AMP1_ADC_PIN = const('A1')
-AMP2_ADC_PIN = const('A3')
+AMP1_ADC_PIN = 'A1'
+AMP2_ADC_PIN = 'A3'
 
 # -------------------
 # Quadrature encoders
 # -------------------
 # TIM 1:
-#   CH_A = "A8"
+#   CH_A = "A8"``
 #   CH_B = "A9"
 ENC1_TIM = const(1)
 # TIM 8:
@@ -27,29 +27,40 @@ ENC2_TIM = const(8)
 # ---------------------
 
 CAN_CH = const(1)
-MOT_ID1 = const(320)
-MOT_ID2 = const(321)
+MOT_ID1 = const(321)
+MOT_ID2 = const(322)
 
 
-# //////////////////////////////
-#   SPI COMMUNICATION PROTOCOL
-# //////////////////////////////
+# //////////////////////////
+#      COMMUNICATION 
+# //////////////////////////
 
 # -----------------
 #   SPI settings
 # -----------------
 SPI_CH = const(1)
-SPI_PRESCALE = const(4)  # the baudrate is given
+SPI_PRESCALE = const(16)  # the baudrate is given
 # SPI_BAUD = /SPI_PRESCALE
-SPI_POL = const(1)
-SPI_PH = const(0)
+SPI_POL = const(0)
+SPI_PH = const(1)
 SPI_BITS = 8
+
+# ----------
+#    UART 
+# ----------
+
+UART_CH = 3
+UART_BAUD = 921600
+UART_BITS = 8
+UART_PARITY = None
+UART_STOP = 1
+UART_TIMEOUT = 0
 
 # -----
 # Sizes 
 # -----
 CMD_SIZE = const(12)
-REPLY_SIZE = const(30)
+REPLY_SIZE = const(32)
 
 # ---------
 # Protocol 
@@ -66,4 +77,4 @@ TURN_OFF = b"\xC7"
 # Formats
 # ///////
 CMD_FORMAT = '<BBhhhhh'
-STATE_FORMAT = '<BBIhhihhihhhh'
+STATE_FORMAT = '<BBIhhihhihhhhBB'

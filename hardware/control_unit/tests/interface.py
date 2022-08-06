@@ -4,10 +4,7 @@ import time
 import RPi.GPIO as GPIO
 from config import *
 
-
-board_id = 0 
-
-ser = serial.Serial(UART_CHANNELS[board_id], 
+ser = serial.Serial(UART_CHANNELS[1], 
                     baudrate = UART_BAUD, 
                     bytesize = UART_BYTESIZE, 
                     parity = UART_PARITY, 

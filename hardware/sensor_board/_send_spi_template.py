@@ -1,63 +1,96 @@
-from time import ticks_us
-from struct import pack, unpack
-from pyb import SPI
 from config import *
+from pyb import CAN, ADC
+from quad_encoder import QuadEncoder
+from myactuator import MyActuator
+from struct import pack, unpack
+from time import ticks_us, sleep_us
+# spi.init()
 
-spi = SPI(SPI_CH)
-spi.init(SPI.SLAVE,
-         prescaler=SPI_CH,
-         polarity=SPI_POL,
-         phase=SPI_PH,
-         bits=SPI_BITS)
+# ////////////// HARDWARE INITIALIZATION //////////////
+
+amp1 = ADC(AMP1_ADC_PIN)  # create an analog object from a pin
+amp2 = ADC(AMP2_ADC_PIN)  # create an analog object from a pin
+
+# Quadrature Encoders
+enc1 = QuadEncoder(timer=ENC1_TIM, direction=1)
+enc2 = QuadEncoder(timer=ENC2_TIM, direction=1)
+
+# ////////////////
+# SETTING CAN BUS
+# ///////////////
+
+can = CAN(CAN_CH, CAN.NORMAL, prescaler=2, sjw=1, bs1=14, bs2=6)
+can.setfilter(0, CAN.LIST16, 0, (MOT_ID1, MOT_ID2, 322, 323))
+
+# //////////////////////
+# CAN BUS BLDC ACTUATOR
+# /////////////////////
+act1 = MyActuator(device_id=MOT_ID1, can=can)
+act2 = MyActuator(device_id=MOT_ID2, can=can)
+
 
 recv_buf = bytearray(CMD_SIZE)
 
-print('Press any key to start')
+print('Press any key to continue...')
 input()
-
 
 try:
     # STATE_FORMAT
-    cmd = 100  # 1 byte
+    cmd = 200  # 1 byte
     error_code = 0  # 1 bytes
-    tick = 112541  # 4 bytes
-    enc1_counts = 2451  # 2 bytes
-    enc2_counts = 1265  # 2 bytes
-    mot1_counts = 1431214  # 4 bytes
-    mot1_speed = 1212  # 2 bytes
-    mot1_current = 415  # 2 bytes
-    mot2_counts = -1235512  # 4 bytes
-    mot2_speed = -341  # 2 bytes
-    mot2_current = -241  # 2 bytes
-    amp1_counts = 14145  # 2 bytes
-    amp2_counts = 12156  # 2 bytes
+    tick = 0  # 4 bytes
+    enc1_counts = 0  # 2 bytes
+    enc2_counts = 0  # 2 bytes
+    mot1_counts = 0  # 4 bytes
+    mot1_speed = 0  # 2 bytes
+    mot1_current = 0  # 2 bytes
+    mot2_counts = 0  # 4 bytes
+    mot2_speed = 0  # 2 bytes
+    mot2_current = 0  # 2 bytes
+    amp1_counts = 0  # 2 bytes
+    amp2_counts = 0  # 2 bytes
 
     while True:
-
+        sleep_us(10000)
         tick = ticks_us()
-        send_bytes = pack(STATE_FORMAT,
-                          cmd,
-                          error_code,
-                          tick,
-                          enc1_counts,
-                          enc2_counts,
-                          mot1_counts,
-                          mot1_speed,
-                          mot1_current,
-                          mot2_counts,
-                          mot2_speed,
-                          mot2_current,
-                          amp1_counts,
-                          amp2_counts)
+        # -------------------
+        # STATE OF DEVICE
+        # -------------------
+        amp1_counts = amp1.read()
+        amp2_counts = amp2.read()
+        enc1_counts = enc1.get_counter(overflow=True)
+        enc2_counts = enc2.get_counter(overflow=True)
 
-        spi.recv(recv_buf)
-        spi.send(send_bytes)
-        cmd_data = unpack(CMD_FORMAT, recv_buf)
-        cmd = cmd_data[0]
-        # print(cmd)
+        act1.set_torque(0, send=True)
+        act1.update_state()
 
+        act2.set_torque(0, send=True)
+        act2.update_state()
 
+        print(cmd,
+              error_code,
+              tick,
+              enc1_counts,
+              enc2_counts,
+              act1.counts_mt,
+              act1.speed,
+              act1.current,
+              act2.counts_mt,
+              act2.speed,
+              act2.current,
+              amp1_counts,
+              amp2_counts,
+              0,
+              0)
 
 
 except KeyboardInterrupt:
-    spi.deinit()
+    print('Exit by interrupt')
+# except Exception as e:
+#     print(e)
+finally:
+    # print('Finally...')
+    uart.deinit()
+    can.deinit()
+    # amp1.deinit()
+    # amp2.deinit()

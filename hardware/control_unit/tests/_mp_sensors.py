@@ -1,7 +1,6 @@
 import serial
 from struct import pack, unpack
 import time 
-import RPi.GPIO as GPIO
 from config import *
 
 

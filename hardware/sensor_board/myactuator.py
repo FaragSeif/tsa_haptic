@@ -120,11 +120,14 @@ class MyActuator:
 
     # def
     @micropython.native
-    def set_torque(self, torque):
+    def set_torque(self, torque, send = False):
         torque_bytes = pack('<h', torque)
         # memoryview(self.msg)
         self.msg = memoryview(SET_TORQUE + 3 * b"\x00" +
                               torque_bytes + 2 * b"\x00")
+        if send:
+            self.send_rcv( self.id, self.msg)
+            
         return self.msg
 
     @micropython.native

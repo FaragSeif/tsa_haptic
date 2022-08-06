@@ -1,9 +1,13 @@
 from config import *
-from pyb import CAN, ADC
+from pyb import CAN, ADC, UART
 from quad_encoder import QuadEncoder
 from myactuator import MyActuator
 from struct import pack, unpack
 from time import ticks_us, sleep_us
+
+# ///////// SPI ////////
+uart = UART(3, 921600, bits=8, parity=None, stop=1, timeout=10000)
+
 # spi.init()
 
 # ////////////// HARDWARE INITIALIZATION //////////////
@@ -51,7 +55,7 @@ try:
     amp2_counts = 0  # 2 bytes
 
     while True:
-        sleep_us(10000)
+        # sleep_us(100)
         tick = ticks_us()
         # -------------------
         # STATE OF DEVICE
@@ -67,23 +71,35 @@ try:
         act2.set_torque(0, send=True)
         act2.update_state()
 
-        print(STATE_FORMAT,
-              cmd,
-              error_code,
-              tick,
-              enc1_counts,
-              enc2_counts,
-              act1.counts_mt,
-              act1.speed,
-              act1.current,
-              act2.counts_mt,
-              act2.speed,
-              act2.current,
-              amp1_counts,
-              amp2_counts,
-              0,
-              0)
+        state_bytes = pack(STATE_FORMAT,
+                           cmd,
+                           error_code,
+                           tick,
+                           enc1_counts,
+                           enc2_counts,
+                           act1.counts_mt,
+                           act1.speed,
+                           act1.current,
+                           act2.counts_mt,
+                           act2.speed,
+                           act2.current,
+                           amp1_counts,
+                           amp2_counts,
+                           0,
+                           0)
 
+        send_bytes = state_bytes
+
+        if uart.any() > 0:
+            uart.read(recv_buf)
+            print(recv_buf)
+            if recv_buf[0] == 200:
+                uart.write(send_bytes)
+                # print(recv_buf)
+
+        # cmd_data = unpack(CMD_FORMAT, recv_buf)
+        # cmd = cmd_data[0]
+        # TODO: PROTOCOL
 
 except KeyboardInterrupt:
     print('Exit by interrupt')
@@ -91,7 +107,7 @@ except KeyboardInterrupt:
 #     print(e)
 finally:
     # print('Finally...')
-    # uart.deinit()
+    uart.deinit()
     can.deinit()
     # amp1.deinit()
     # amp2.deinit()

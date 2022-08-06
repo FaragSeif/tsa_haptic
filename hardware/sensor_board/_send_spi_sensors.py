@@ -5,7 +5,7 @@ from config import *
 
 spi = SPI(SPI_CH)
 spi.init(SPI.SLAVE,
-         prescaler=SPI_CH,
+         prescaler=SPI_PRESCALE,
          polarity=SPI_POL,
          phase=SPI_PH,
          bits=SPI_BITS)

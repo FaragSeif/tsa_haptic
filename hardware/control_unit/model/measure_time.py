@@ -1,5 +1,5 @@
 import numpy as np
-from models.kinematics import *
+from kinematics import *
 from time import perf_counter
 
 end_effector_pos = np.array([0,0,70])
