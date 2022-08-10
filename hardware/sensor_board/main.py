@@ -76,16 +76,16 @@ try:
                                        error_code,
                                        tick,
                                        enc1_counts,
-                                       enc2_counts,
                                        act1.counts_mt,
                                        act1.speed,
                                        act1.current,
+                                       amp1_counts,
+                                       0,
+                                       enc2_counts,
                                        act2.counts_mt,
                                        act2.speed,
                                        act2.current,
-                                       amp1_counts,
                                        amp2_counts,
-                                       0,
                                        0)
 
                     send_bytes = state_bytes

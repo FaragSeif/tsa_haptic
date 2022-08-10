@@ -1,7 +1,9 @@
 from sensor_board import SensorBoardInterface
 from time import sleep
 
-# 
+# TODO:
+# print all stuff
+# test sending the commands
 
 boards = [] 
 for board_id in range(2):
@@ -11,8 +13,6 @@ for board_id in range(2):
 try:
     while True:
         print(boards[0].shared.angle_counts, boards[1].shared.angle_counts)
-        print(boards[0].shared.angle_counts, boards[1].shared.angle_counts)
-
         
 except KeyboardInterrupt:
     print('Exit by interrupt')

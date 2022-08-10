@@ -1,0 +1,1 @@
+rsync -a pi@pi.local:control_unit/ control_unit/

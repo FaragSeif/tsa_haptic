@@ -1,10 +1,11 @@
 import serial
 from struct import pack, unpack
 import time 
-from tsa_haptic.hardware.control_unit.sensor_board.config import *
+import RPi.GPIO as GPIO
+from config import *
 
 
-board_id = 0 
+board_id = 1
 
 ser = serial.Serial(UART_CHANNELS[board_id], 
                     baudrate = UART_BAUD, 

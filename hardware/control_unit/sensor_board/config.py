@@ -9,7 +9,7 @@ UART_CHANNELS = ['/dev/ttyAMA1',
 CMD_SIZE = 12
 REPLY_SIZE = 32
 
-REPLY_FORMAT ='<BIhihhhBhihhhB'
+REPLY_FORMAT ='<BBIhihhhBhihhhB'
 CMD_FORMAT = '<BBhhhhh'
 
 

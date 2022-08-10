@@ -2,7 +2,7 @@ import serial
 from struct import pack, unpack
 import time 
 import RPi.GPIO as GPIO
-from config import *
+from tsa_haptic.hardware.control_unit.sensor_board.config import *
 
 ser = serial.Serial(UART_CHANNELS[1], 
                     baudrate = UART_BAUD, 
