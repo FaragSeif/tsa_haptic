@@ -40,8 +40,14 @@ act2 = MyActuator(device_id=MOT_ID2, can=can) #, reset=True)
 
 recv_buf = bytearray(CMD_SIZE)
 
+    
+
 # print('Press any key to continue...')
 # input()
+# cmd_cntrl = TORQUE_CMD
+no_rcv_count = 0
+
+desired_torques = [0, 0]
 
 try:
     # STATE_FORMAT
@@ -60,19 +66,20 @@ try:
         enc1_counts = enc1.get_counter(overflow=True)
         enc2_counts = enc2.get_counter(overflow=True)
 
-        act1.set_torque(0, send=True)
+        act1.set_torque(desired_torques[0], send=True)
         act1.update_state()
 
-        act2.set_torque(0, send=True)
+        act2.set_torque(desired_torques[1], send=True)
         act2.update_state()
 
         while True:
             if uart.any() > 0:
+                no_rcv_count = 0 
                 rcv = uart.read(1)
                 if rcv[0] == 200:
 
                     state_bytes = pack(STATE_FORMAT,
-                                       cmd,
+                                       rcv[0],
                                        error_code,
                                        tick,
                                        enc1_counts,
@@ -89,14 +96,26 @@ try:
                                        0)
 
                     send_bytes = state_bytes
-                    uart.read(CMD_SIZE - 1)
+                    rcv_bytes = uart.read(CMD_SIZE - 1)
+                    # print(rcv_bytes)
+                    rcv_data = unpack(CMD_FORMAT, rcv + rcv_bytes)
+                    # print(rcv_data)
+                    
+                    desired_torques[0] = rcv_data[3]
+                    desired_torques[1] = rcv_data[5]
+                     
                     uart.write(send_bytes)
+                    
                     
                     break
             else:
-                # act1.set_torque(0, send=True)
-                # act1.set_torque(0, send=True)
+                no_rcv_count += 1
+                if no_rcv_count >= 50:
+                    desired_cmd = [0, 0]
+                    desired_torques = [0, 0] 
+                    # print('No cmd')
                 break
+        # print(desired_torques)
                 # print('No command')
                 # NO COMMAND RECEIVED
         # tick2 = ticks_us()

@@ -31,8 +31,14 @@ class RobotInterface:
         
         self.state = RecursiveNamespace(**self.__state_dict)
 
+        self.cmd_modes = [0xA1, 0xA1, 0xA1, 0xA1]
+        self.cmd_data = zeros(4)
+
+
     def __del__(self):
         print('Interface was destroyed')
+
+    # def update_device(self):
 
     def update_state(self):
         for board_id in range(2):
@@ -53,7 +59,16 @@ class RobotInterface:
         pass
 
 
-    def set_torques(self):
+    def set_torques(self, torques = zeros(4)):
+        self.cmd_modes = [0xA1, 0xA1, 0xA1, 0xA1]
+        self.cmd_data = torques
+        for board_id in range(2):
+            self.boards[board_id].set_command(self.cmd_modes[2*board_id:2*(board_id+1)], 
+                                               self.cmd_data[2*board_id:2*(board_id+1)])
+            # print(self.boards[board_id].cmd)
+
+    
+    def set_modes(self):
         pass
     
     def set_cart_pos(self):

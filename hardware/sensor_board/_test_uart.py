@@ -92,10 +92,8 @@ try:
 
         if uart.any() > 0:
             uart.read(recv_buf)
-            print(recv_buf)
             if recv_buf[0] == 200:
                 uart.write(send_bytes)
-                # print(recv_buf)
 
         # cmd_data = unpack(CMD_FORMAT, recv_buf)
         # cmd = cmd_data[0]

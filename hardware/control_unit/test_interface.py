@@ -7,6 +7,7 @@ robot = RobotInterface()
 #
 try:
     while True:
+        robot.set_torques(torques = [30, 30, 30, 30])
         robot.update_state()
         
         print(f'\n{15*"/"} DEVICE STATE {15*"/"}')

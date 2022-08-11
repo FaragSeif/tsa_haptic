@@ -18,7 +18,7 @@ CMD_SIZE = 12
 REPLY_SIZE = 32
 
 REPLY_FORMAT ='<BIhihhhBhihhhB'
-CMD_FORMAT = '<BBhhhhh'
+CMD_FORMAT = '<BBBiBi'
 
 
 # SCALES 
@@ -41,8 +41,10 @@ class SensorBoardInterface:
                                   timeout=UART_TIMEOUT)
 
         self._zero_command = pack(CMD_FORMAT,
-                                  self.CMD,
-                                  0, 0, 0, 0, 0, 0)
+                                  self.CMD, 
+                                  0,
+                                  0xA1, 0,
+                                  0XA1, 0)
 
         self.received_bytes = bytearray(REPLY_SIZE)
 
@@ -50,6 +52,7 @@ class SensorBoardInterface:
         self.__initialize_shared_states()
 
         self.command = self._zero_command
+        
         self._process_is_working = False
         self._handler_process = Process(target=self.__handler)
 
@@ -84,7 +87,8 @@ class SensorBoardInterface:
             while True:
                 # print(self.__tick.value)
                 # actual_time = perf_counter() - initial_time
-                self.update_state()
+                cmd = self.pack_command(self.__command_modes, self.__command_data)
+                self.update_device(cmd)
         
         except KeyboardInterrupt:
             print(f'Exit by interrupt from sensor board {self.board_id}')
@@ -104,7 +108,9 @@ class SensorBoardInterface:
         self.__torque_counts = Array('i', 2*[0])
         self.__force_counts = Array('i', 2*[0])
         self.__linear_counts = Array('i', 2*[0])
-        self.__stop_limits = Array('i', 2*[0])        
+        self.__stop_limits = Array('i', 2*[0])   
+        self.__command_modes = Array('i', 2*[0])      
+        self.__command_data = Array('i', 2*[0])  
 
 
     def __initialize_states(self):
@@ -171,10 +177,25 @@ class SensorBoardInterface:
 
         return self.received_data
 
-    def set_command(self, command):
-        self.command = command
+    # def set_command(self, command):
+    #     self.command = command
 
-    def update_state(self, command=None):
+    def pack_command(self, cmd_modes, cmd_data):
+        
+        self.command = pack(CMD_FORMAT,
+                            self.CMD, 
+                            0,
+                            cmd_modes[0], cmd_data[0],
+                            cmd_modes[1], cmd_data[1])
+        return self.command 
+
+    def set_command(self, cmd_modes, cmd_data):
+        for i in range(2):
+            self.__command_modes[i] = cmd_modes[i]
+            self.__command_data[i] = cmd_data[i]
+        
+        
+    def update_device(self, command):
         if command is not None:
             cmd = command
         else:

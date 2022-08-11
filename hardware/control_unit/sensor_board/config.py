@@ -10,7 +10,7 @@ CMD_SIZE = 12
 REPLY_SIZE = 32
 
 REPLY_FORMAT ='<BBIhihhhBhihhhB'
-CMD_FORMAT = '<BBhhhhh'
+CMD_FORMAT = '<BBBiBi'
 
 
 # SCALES 

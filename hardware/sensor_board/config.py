@@ -76,5 +76,6 @@ TURN_OFF = b"\xC7"
 # ///////
 # Formats
 # ///////
-CMD_FORMAT = '<BBhhhhh'
+CMD_FORMAT = '<BBBiBi'
 STATE_FORMAT = '<BBIhihhhBhihhhB'
+
