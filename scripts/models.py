@@ -1,5 +1,26 @@
-from config import *
+# from params import *
 import numpy as np
+
+
+
+
+# Mechanism parameters
+d = 15  # mm
+D = 110  # mm
+R = 33  # mm
+l = 213.20  # mm
+d_c = 93.5  # mm
+d_b = 177
+rc_4 = np.array([0, 0, -185]) # mm 
+phi_angles = [2*np.pi*(i)/3 + np.pi/2 for i in range(3)] # rad
+# ADD PARAMETERS ON INNER TRIANGLE
+
+
+# TSA parameters
+L = [315, 315, 315, 325 ]  # mm
+r = [0.75, 0.75, 0.75, 0.75]  # mm
+
+
 
 # //////////////////
 # /// TSA models ///
@@ -40,10 +61,11 @@ def tsa_jacobian_x(X, L, r):
 # ////////////////////////
 
 
-def carriage_pos(X, phi, L):
+def carriage_pos(lin_pos, phi, L):
     rc_x = (D - d)*np.cos(phi)
     rc_y = (D - d)*np.sin(phi)
-    rc_z = X - L + d_c
+    rc_z = lin_pos - d_b#X - L + d_c
+    
     return np.array([rc_x, rc_y, rc_z])
 
 
@@ -52,34 +74,66 @@ frame_hinges_loc_pos = np.array([R*np.cos(phi_angles),
                                  np.zeros(3)]).T
 
 
+# def trilaterate(spheres_centers, spheres_radii):
+#     ''' Find the intersection of three spheres,
+#         spheres_centers = [p1,p2,p3] are the centers,
+#         spheres_radii = [r1,r2,r3] are the radii
+#         '''
+
+#     p1, p2, p3 = spheres_centers
+#     r1, r2, r3 = spheres_radii
+
+#     temp1 = p2-p1
+#     e_x = (temp1)/np.linalg.norm(temp1)
+
+#     temp2 = p3-p1
+#     i_ort = e_x @ temp2
+#     temp3 = temp2 - i_ort*e_x
+    
+#     e_y = temp3/np.linalg.norm(temp3)
+#     e_z = np.cross(e_x, e_y)
+#     d = np.linalg.norm(p2-p1)
+#     j_ort = e_y @ temp2
+#     x = (r1*r1 - r2*r2 + d*d) / (2*d)
+#     y = (r1*r1 - r3*r3 - 2*i_ort*x + i_ort*i_ort + j_ort*j_ort) / (2*j_ort)
+#     temp4 = r1*r1 - x*x - y*y
+#     if temp4 < 0:
+#         raise Exception("The three spheres do not intersect!")
+#     z = np.sqrt(temp4)
+#     intersection = p1 + x*e_x + y*e_y - z*e_z
+
+#     return intersection
+
+
 def trilaterate(spheres_centers, spheres_radii):
-    ''' Find the intersection of three spheres,
-        spheres_centers = [p1,p2,p3] are the centers,
-        spheres_radii = [r1,r2,r3] are the radii
-        '''
-
-    p1, p2, p3 = spheres_centers
+    P1, P2, P3 =  spheres_centers
     r1, r2, r3 = spheres_radii
+    p1 = np.array([0, 0, 0])
+    p2 = np.array([P2[0] - P1[0], P2[1] - P1[1], P2[2] - P1[2]])
+    p3 = np.array([P3[0] - P1[0], P3[1] - P1[1], P3[2] - P1[2]])
+    v1 = p2 - p1
+    v2 = p3 - p1
 
-    temp1 = p2-p1
-    e_x = (temp1)/np.linalg.norm(temp1)
+    Xn = (v1)/np.linalg.norm(v1)
 
-    temp2 = p3-p1
-    i = e_x @ temp2
-    temp3 = temp2 - i*e_x
-    e_y = temp3/np.linalg.norm(temp3)
-    e_z = np.cross(e_x, e_y)
-    d = np.linalg.norm(p2-p1)
-    j = e_y @ temp2
-    x = (r1*r1 - r2*r2 + d*d) / (2*d)
-    y = (r1*r1 - r3*r3 - 2*i*x + i*i + j*j) / (2*j)
-    temp4 = r1*r1 - x*x - y*y
-    if temp4 < 0:
-        raise Exception("The three spheres do not intersect!")
-    z = np.sqrt(temp4)
-    intersection = p1 + x*e_x + y*e_y + z*e_z
+    tmp = np.cross(v1, v2)
 
-    return intersection
+    Zn = (tmp)/np.linalg.norm(tmp)
+
+    Yn = np.cross(Xn, Zn)
+
+    i = np.dot(Xn, v2)
+    d = np.dot(Xn, v1)
+    j = np.dot(Yn, v2)
+
+    X = ((r1**2)-(r2**2)+(d**2))/(2*d)
+    Y = (((r1**2)-(r3**2)+(i**2)+(j**2))/(2*j))-((i/j)*(X))
+    Z1 = np.sqrt(max(0, r1**2-X**2-Y**2))
+    Z2 = -Z1
+
+    K1 = P1 + X * Xn + Y * Yn + Z1 * Zn
+    K2 = P1 + X * Xn + Y * Yn + Z2 * Zn
+    return K1#,K2
 
 
 def forward_kinematics(contractions):
@@ -93,6 +147,7 @@ def forward_kinematics(contractions):
     for i in range(3):
         rc_i = carriage_pos(contractions[i], phi_angles[i], L[i])
         rh_i = frame_hinges_loc_pos[i]
+
         spheres_centers[i] = rc_i - rh_i
 
     end_effector_pos = trilaterate(spheres_centers, spheres_radii)
@@ -122,6 +177,7 @@ def jacobians(contractions):
 
     jac_m = np.zeros((4, 3))
     jac_d = np.zeros((4, 3))
+    jac_tsa = np.zeros((4, 4))
     r_e = forward_kinematics(contractions)
 
     for i in range(4):
@@ -133,7 +189,36 @@ def jacobians(contractions):
             rh_i = frame_hinges_loc_pos[i]
             rf_i = r_e + rh_i
             jac_m[i] = (rc_i - rf_i)/(contractions[i] - L[i] + d_c - r_e[2])
+        jac_tsa[i,i] = tsa_jacobian_x(contractions[i], L[i], r[i])
+        jac_d[i] = jac_m[i]/jac_tsa[i,i]
 
-        jac_d[i] = jac_m[i]/tsa_jacobian_x(contractions[i], L[i], r[i])
+    return jac_m, jac_d, jac_tsa
 
-    return jac_m, jac_d
+
+
+def full_kinematics(cart_positions, motor_angles):
+    '''Calculate mechanism and device Jacobians, as well as forward kinematics based on 
+       carriage positions'''
+
+    jac_m = np.zeros((4, 3))
+    jac_d = np.zeros((4, 3))
+    jac_s = np.zeros((4, 4))
+    r_e = forward_kinematics(cart_positions)
+
+    for i in range(4):
+        if i == 3:
+            delta_r = rc_4 - r_e
+            jac_m[i] = delta_r/np.linalg.norm(delta_r)
+        else:
+            rc_i = carriage_pos(cart_positions[i], phi_angles[i], L[i])
+            rh_i = frame_hinges_loc_pos[i]
+            rf_i = r_e + rh_i
+            jac_m[i] = (rc_i - rf_i)/(rc_i[2] - r_e[2])
+        jac_s[i,i] = tsa_jacobian_theta(motor_angles[i], L[i], r[i])
+        jac_d[i] = jac_m[i]/jac_s[i,i]
+
+    return r_e, jac_m, jac_d, jac_s
+
+
+
+# def kinematics()

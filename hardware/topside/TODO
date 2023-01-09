@@ -1,0 +1,4 @@
+add curses interface for printing and testing modes
+create bash script and alias to start device, loging and set_points
+create virtual env 
+

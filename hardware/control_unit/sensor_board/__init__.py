@@ -21,17 +21,11 @@ REPLY_FORMAT ='<BIhihhhBhihhhB'
 CMD_FORMAT = '<BBBiBi'
 
 
-# SCALES 
-LINEAR_ENCODER_SCALE = 1
-MOTOR_ENCODER_SCALE = 1
-MOTOR_SPEED_SCALE = 1
-MOTOR_TORQUE_SCALE = (1, 1, 1, 1)
-LOAD_CELL_SCALE = (1, 1, 1, 1)
-
-
 class SensorBoardInterface:
     def __init__(self, board_id=0) -> None:
+         
         self.board_id = board_id
+        print(f'[SENSOR BOARD {self.board_id}] Initialization of sensor board interface')
         self.CMD = 200
         self.uart = serial.Serial(UART_CHANNELS[board_id],
                                   baudrate=UART_BAUD,
@@ -55,25 +49,26 @@ class SensorBoardInterface:
         
         self._process_is_working = False
         self._handler_process = Process(target=self.__handler)
+        
 
     def __del__(self):
         if self._process_is_working:
             self.stop(output=True)
-            print(f'sensor board {self.board_id} process is over')
+            print(f'--- [SENSOR BOARD {self.board_id}] process is over ---')
             
         self.uart.close()
-        print(f'UART {UART_CHANNELS[self.board_id]} is closed')
+        print(f'--- [SENSOR BOARD {self.board_id}] UART {UART_CHANNELS[self.board_id]} is closed ---')
 
     def start(self):
-        print('Sensor board process is activated....')
+        print(f'--- [SENSOR BOARD {self.board_id}] process is activated ---')
         self._handler_process.start()
-        print('Waiting for process to start...')
+        print('--- Waiting for process to start ---')
         sleep(0.2)
 
     def stop(self, output=False):
         self._handler_process.terminate()
         if output:
-            print('Robot process was terminated')
+            print(f'--- [SENSOR BOARD {self.board_id}] process is terminated ---')
         
 
     def __handler(self):
@@ -81,6 +76,8 @@ class SensorBoardInterface:
         try:
             
             self._process_is_working = 1
+            print(f'--- [SENSOR BOARD {self.board_id}] process is running ---\n')
+            
             
             # initial_time = perf_counter()
             # tick = 0
@@ -91,13 +88,13 @@ class SensorBoardInterface:
                 self.update_device(cmd)
         
         except KeyboardInterrupt:
-            print(f'Exit by interrupt from sensor board {self.board_id}')
+            print(f'--- [SENSOR BOARD {self.board_id}] Exit by interrupt ---')
             self._process_is_working
         except Exception as e:
-            print(f'Get exception in sensor board {self.board_id}')
+            print(f'--- [SENSOR BOARD {self.board_id}] Get exception ---')
             print(e)
         finally:
-            print(f'Attempting to kill the board {self.board_id} process...')
+            print(f'--- [SENSOR BOARD {self.board_id}] Attempting to kill the process ---' )
             
 
     def __initialize_shared_states(self):

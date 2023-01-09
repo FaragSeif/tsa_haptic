@@ -1,0 +1,14 @@
+package protocol;
+
+struct raw_state_t
+{
+    int16_t  mode;    
+    int64_t  timestamp;
+    double   carriage_positions[3];
+    double   motor_angles[4];
+    double   motor_speeds[4];
+    double   motor_torques[4];
+    double   tensions[4];
+    int16_t  error_flags;
+    boolean  armed;
+}

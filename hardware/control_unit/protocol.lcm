@@ -1,0 +1,37 @@
+package protocol;
+
+struct commands_t
+{
+    int64_t  timestamp;
+    int16_t  mode;
+    double   desired_position[4];
+    double   desired_speed[4];
+    double   desired_accel[4];
+    boolean  arm;
+}
+
+struct device_states_t
+{
+    int16_t  mode;    
+    int64_t  timestamp;
+    double   cartesian_position[3];
+    double   cartesian_velocity[3];
+    double   carriage_positions[3];
+    double   motor_angles[4];
+    double   motor_speeds[4];
+    double   motor_torques[4];
+    double   tensions[4];
+    double   cartesian_force[4];
+    int16_t  error_flags;
+    boolean  armed;
+}
+
+struct controller_states_t
+{
+    int16_t  mode;
+    int64_t  timestamp;
+    double   control_torques[4];
+    int16_t  error_flag;
+    boolean  armed;
+}
+

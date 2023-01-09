@@ -1,0 +1,13 @@
+package protocol;
+
+struct command_t
+{
+    int64_t  timestamp;
+    int16_t  mode;
+    double   desired_position[4];
+    double   desired_speed[4];
+    double   desired_accel[4];
+    double   desired_stiffness[4];
+    double   desired_damping[4];
+    boolean  arm;
+}

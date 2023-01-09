@@ -5,6 +5,8 @@ from myactuator import MyActuator
 from struct import pack, unpack
 from time import ticks_us, sleep_us
 
+# TODO: ADD SWITCHES
+
 # ///////// SPI ////////
 uart = UART(UART_CH, 
             UART_BAUD, 
@@ -30,7 +32,7 @@ enc2 = QuadEncoder(timer=ENC2_TIM, direction=1)
 
 can = CAN(CAN_CH, CAN.NORMAL, prescaler=2, sjw=1, bs1=14, bs2=6)
 can.setfilter(0, CAN.LIST16, 0, (MOT_ID1, MOT_ID2, 322, 323))
-
+# print('done')
 # //////////////////////
 # CAN BUS BLDC ACTUATOR
 # /////////////////////
@@ -48,29 +50,36 @@ recv_buf = bytearray(CMD_SIZE)
 no_rcv_count = 0
 
 desired_torques = [0, 0]
+# STATE_FORMAT
+cmd = 200  # 1 byte
+error_code = 0  # 1 bytes
+tick = 0  # 4 bytes
+
+
 
 try:
-    # STATE_FORMAT
-    cmd = 200  # 1 byte
-    error_code = 0  # 1 bytes
-    tick = 0  # 4 bytes
-
     while True:
+                
         # sleep_us(100)
         tick = ticks_us()
         # -------------------
         # STATE OF DEVICE
         # -------------------
+
+            # print(desired_torques)
+                    # print('No command')
+                    # NO COMMAND RECEIVED
+            # tick2 = ticks_us()
+            # print(tick2 - tick)
+        act1.set_torque(desired_torques[0], send=True)
+        act1.update_state()
+        act2.set_torque(desired_torques[1], send=True)
+        act2.update_state()
         amp1_counts = amp1.read()
         amp2_counts = amp2.read()
         enc1_counts = enc1.get_counter(overflow=True)
         enc2_counts = enc2.get_counter(overflow=True)
 
-        act1.set_torque(desired_torques[0], send=True)
-        act1.update_state()
-
-        act2.set_torque(desired_torques[1], send=True)
-        act2.update_state()
 
         while True:
             if uart.any() > 0:
@@ -79,21 +88,21 @@ try:
                 if rcv[0] == 200:
 
                     state_bytes = pack(STATE_FORMAT,
-                                       rcv[0],
-                                       error_code,
-                                       tick,
-                                       enc1_counts,
-                                       act1.counts_mt,
-                                       act1.speed,
-                                       act1.current,
-                                       amp1_counts,
-                                       0,
-                                       enc2_counts,
-                                       act2.counts_mt,
-                                       act2.speed,
-                                       act2.current,
-                                       amp2_counts,
-                                       0)
+                                        rcv[0],
+                                        error_code,
+                                        tick,
+                                        enc1_counts,
+                                        act1.counts_mt,
+                                        act1.speed,
+                                        act1.current,
+                                        amp1_counts,
+                                        0,
+                                        enc2_counts,
+                                        act2.counts_mt,
+                                        act2.speed,
+                                        act2.current,
+                                        amp2_counts,
+                                        0)
 
                     send_bytes = state_bytes
                     rcv_bytes = uart.read(CMD_SIZE - 1)
@@ -103,33 +112,24 @@ try:
                     
                     desired_torques[0] = rcv_data[3]
                     desired_torques[1] = rcv_data[5]
-                     
+                        
                     uart.write(send_bytes)
-                    
-                    
                     break
+
             else:
                 no_rcv_count += 1
                 if no_rcv_count >= 50:
                     desired_cmd = [0, 0]
                     desired_torques = [0, 0] 
+                    error_code = 1
                     # print('No cmd')
                 break
-        # print(desired_torques)
-                # print('No command')
-                # NO COMMAND RECEIVED
-        # tick2 = ticks_us()
-        # print(tick2 - tick)
-
-
 
 except KeyboardInterrupt:
     print('Exit by interrupt')
-# except Exception as e:
-#     print(e)
+except Exception as e:
+    print(e, error_code)
 finally:
-    # print('Finally...')
     uart.deinit()
     can.deinit()
-    # amp1.deinit()
-    # amp2.deinit()
+

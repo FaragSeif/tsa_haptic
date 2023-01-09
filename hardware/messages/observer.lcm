@@ -1,0 +1,16 @@
+package protocol;
+
+struct observer_t
+{
+    int16_t  mode;
+    int64_t  timestamp;
+    double   cartesian_position[3];
+    double   cartesian_velocity[3];
+    double   carriage_positions[3];
+    double   carriage_velocity[3];
+    double   motor_angles[4];
+    double   motor_speeds[4];
+    double   cartesian_force[3];
+    int16_t  error_flag;
+    boolean  armed;
+}
