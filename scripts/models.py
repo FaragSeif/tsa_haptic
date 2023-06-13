@@ -18,7 +18,7 @@ phi_angles = [2*np.pi*(i)/3 + np.pi/2 for i in range(3)] # rad
 
 # TSA parameters
 L = [315, 315, 315, 325 ]  # mm
-r = [0.75, 0.75, 0.75, 0.75]  # mm
+r = [0.7, 0.7, 0.7, 0.7]  # mm
 
 
 

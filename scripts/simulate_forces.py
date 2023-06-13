@@ -26,10 +26,10 @@ def _centroid_poly(poly):
 # write the script to store all the criterias in the dictionary
 
 
-plt.style.use('plots/test_style.mplstyle')
+# plt.style.use('plots/test_style.mplstyle')
 
 
-samples = 10000
+samples = 30000
 torque_pos = generate_sphere_points(4, samples=samples, positive_sector=True)
 torque_all = generate_sphere_points(4, samples=samples)
 
@@ -108,10 +108,20 @@ min_point_xy = force_pos_xy_vertices[:, min_point_ind_xy]
 print(max_point_xy, min_point_xy)
 force_pos_xy_cond = np.max(force_pos_xy_norms)/np.min(force_pos_xy_norms)
 
-force_pos_zy_vertices = np.array(
-    [forces_zy_pos[zy_pos_hull.vertices, 0], forces_zy_pos[zy_pos_hull.vertices, 1]])
-force_pos_zy_norms = np.linalg.norm(force_pos_zy_vertices, axis=0)
+force_pos_zy_vertices = np.array([forces_zy_pos[zy_pos_hull.vertices, 0], 
+                                  forces_zy_pos[zy_pos_hull.vertices, 1]])
+
+zy_centroid_pos = _centroid_poly(forces_zy_pos)
+zy_centroid_pos = zy_centroid_pos
+print(f'Centroid {zy_centroid_pos}')
+force_pos_zy_norms = np.linalg.norm(force_pos_zy_vertices - np.reshape(zy_centroid_pos, (2,1)), axis=0)
 force_pos_zy_cond = np.max(force_pos_zy_norms)/np.min(force_pos_zy_norms)
+
+max_point_ind_zy = np.argmax(force_pos_zy_norms)
+min_point_ind_zy = np.argmin(force_pos_zy_norms)
+max_point_zy = force_pos_zy_vertices[:, max_point_ind_zy]
+min_point_zy = force_pos_zy_vertices[:, min_point_ind_zy]
+
 
 # plr.plot()
 
@@ -128,8 +138,10 @@ print(np.mean(forces_zy_pos[zy_pos_hull.vertices], axis=0))
 # xy_centroid_pos = _centroid_poly(forces_xy_pos)
 # print(xy_centroid_pos)
 # print(np.linalg.norm(xy_centroid_pos))
+
 xy_centroid_pos = np.zeros(2)
-# zy_centroid_pos = _centroid_poly(forces_zy_pos)
+
+zy_centroid_pos = np.zeros(2)
 # print(zy_centroid_pos)
 # print(np.linalg.norm(zy_centroid_pos))
 # /////////////////////////////////
@@ -165,6 +177,38 @@ ax = plt.gca()
 ax.set_aspect('equal')
 plt.savefig('plots/reach_forces_xy.png')
 plt.show()
+
+plt.figure(figsize=(4, 3), dpi=300)
+
+plt.fill(force_all_zy_vertices[0],
+         force_all_zy_vertices[1],
+         'red', alpha=0.1)
+
+plt.fill(force_pos_zy_vertices[0],
+         force_pos_zy_vertices[1],
+         'white')
+plt.scatter(zy_centroid_pos[0], zy_centroid_pos[1], color='blue')
+
+plt.plot([zy_centroid_pos[0], max_point_zy[0]], [zy_centroid_pos[1], max_point_zy[1]],
+         linestyle='--', marker='o', color='blue')
+plt.plot([zy_centroid_pos[0], min_point_zy[0]], [zy_centroid_pos[1], min_point_zy[1]],
+         linestyle='--', marker='o', color='blue')
+
+
+for simplex in zy_pos_hull.simplices:
+    plt.plot(forces_zy_pos[simplex, 0],
+             forces_zy_pos[simplex, 1], 'b-', linewidth=2)
+plt.fill(forces_zy_pos[zy_pos_hull.vertices, 0],
+         forces_zy_pos[zy_pos_hull.vertices, 1], 'blue', alpha=0.1)
+for simplex in zy_all_hull.simplices:
+    plt.plot(forces_zy_all[simplex, 0],
+             forces_zy_all[simplex, 1], 'r-', linewidth=2)
+ax = plt.gca()
+ax.set_aspect(aspect = 5)
+plt.savefig('plots/reach_forces_zy.png')
+plt.show()
+
+
 
 
 # import matplotlib.pyplot as plt

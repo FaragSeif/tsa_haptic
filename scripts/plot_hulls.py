@@ -21,6 +21,7 @@ for plane in planes:
     plane_x = data_dict[plane]['r_e'][:, 0]
     plane_y = data_dict[plane]['r_e'][:, 1]
     plane_z = data_dict[plane]['r_e'][:, 2]
+    
     plane_points = len(plane_x)
 
     if plane == 'xy':
@@ -50,6 +51,7 @@ for plane in planes:
 # print(axs)
 # plt.title(r'Volume of hull over device jacobian')
 # print(len(axs))
+
 criteria_labels = ['jac_d_vol',
                    'jac_m_vol',
                    'jac_d_cond',
@@ -77,9 +79,13 @@ for cind, criteria_label in enumerate(criteria_labels):
         if plane == 'xy':
             plt.xlabel('x')
             plt.ylabel('y')
-        # plt.colorbar(location='left')
+            # plt.colorbar(location='left')
+        
         if plane == 'zy':
             plt.xlabel('z')
+            
+            ax.axes.yaxis.set_ticklabels([])
+            
             # plt.ylabel('x')
             # plt.tick_params(axis='y',          # changes apply to the x-axis
             #                 which='both',      # both major and minor ticks are affected
@@ -87,12 +93,13 @@ for cind, criteria_label in enumerate(criteria_labels):
             #                 top=False,         # ticks along the top edge are off
             #                 labelbottom=False)  # labels along the bottom edge are off
             # plt.yticks([], [])
-            ax.axes.yaxis.set_ticklabels([])
+            
+            
             # ax.set_yticks([])
             # for minor ticks
             # ax.set_yticks([], minor=True)
 
-        # plt.colorbar(location='right')
+            # plt.colorbar(location='right')
 
         contours = plt.contour(
             data_dict[plane]['grid'][0], data_dict[plane]['grid'][1], plot_grid, 4, linewidths=1.5)

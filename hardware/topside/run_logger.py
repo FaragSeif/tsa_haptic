@@ -14,13 +14,15 @@ N = 10000000
 n = 1 + 4 + 4 + 4 + 4 + 3 + 4
 data_array = np.zeros((N,n))
 
-label = 'cartesian_points_v2'
+# label = 'cartesian_points_v2'
 # label = 'cartesian_points_v2'
 # label = 'cartesian_circle_v4'
-# label = 'z_motion_slow_motors_7kg'
+label = 'x_motion_slow_motors_5kg'
+label = 'var_spiral_motion_slow_motors_5kg'
+# label = 'circle_motion_slow_motors_5kg'
 # label = 'calibration'
 # label = 'cartesian_points_v3'
-label = 'cartesian_points_v3'
+# label = 'cartesian_points_v3'
 
 
 try:

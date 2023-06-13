@@ -84,7 +84,7 @@ try:
                 joint_pd = kp@(theta_d[:3] - theta[:3]) + \
                     kd@(dtheta_d[:3] - dtheta[:3])  # + 3*np.ones(3)
                 control[:3] = joint_pd
-                control[3] = -45
+                control[3] = -20
 
             # --- MODE 12: JOINT SPACE PD  ---
 
@@ -92,12 +92,19 @@ try:
                 theta_d = desired_position
                 dtheta_d = desired_speed
 
-                kp = 7.0*np.eye(4)
-                kd = 0.3*np.eye(4)
+                kp = 6*np.eye(4)
+                # kp[3,3] = 0
+                kd = 0.25*np.eye(4)
+                # kd[3,3] = 0.1
 
                 joint_pd = kp@(theta_d - theta) + \
                     kd@(dtheta_d - dtheta)  # + 3*np.ones(3)
-                control = joint_pd
+
+                motor_damping = np.array([0.015, 0.015, 0.015, 0.02])
+                # motor_damping[3] = 0.02
+                motor_friction = motor_damping*dtheta
+
+                control = joint_pd + 0*motor_friction
 
             # --- MODE 21: QP BASED CARTESIAN SPACE PD + TENSION PRESERVING ---
 
@@ -113,8 +120,8 @@ try:
                                                20.])
 
                 cartesian_damping = np.diag([0.4,
-                                            0.4,
-                                            0.4])
+                                             0.4,
+                                             0.4])
 
                 motor_damping = 0.015*np.eye(4)
                 motor_damping[3] = 0.02
@@ -142,7 +149,8 @@ try:
                 torque_min = -torque_max
                 tension_min = np.array([2, 2, 2, 2]) + \
                     jacobian_s @ motor_friction
-                tension_max = np.array([80, 80, 80, 150]) + jacobian_s @ motor_friction
+                tension_max = np.array(
+                    [80, 80, 80, 150]) + jacobian_s @ motor_friction
 
                 control = qp_posture_torques(jacobian_d,
                                              jacobian_s,

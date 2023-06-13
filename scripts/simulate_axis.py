@@ -43,7 +43,7 @@ axes = {'x': {'x': np.linspace(-50, 50, samples),
 pretension = 1
 
 # for axis in ['x', 'y', 'z', 'spiral']:
-for axis in ['x', 'y', 'z', 'spiral']:
+for axis in ['x', 'y', 'z']:
     for i in range(samples):
         r_x, r_y, r_z = axes[axis]['x'][i], axes[axis]['y'][i], axes[axis]['z'][i]
         r_i = np.array([r_x, r_y, r_z])

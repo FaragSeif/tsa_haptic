@@ -21,7 +21,7 @@ try:
     while True:
         t = perf_counter() - t0
         if t - t_upd >= 1E-2:
-            A, omega = 30, 3.0
+            A, omega = 30, 0.5
             commands_message.arm = True
             commands_message.timestamp = int(t*1000)
             commands_message.mode = 21

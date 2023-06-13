@@ -3,11 +3,11 @@ from lcm_interface import commands_message, publish
 
 commands_message.mode = 0
 
-set_points = [[200, 200, 200],
-              [120, 160, 160], 
-              [170, 200, 200],
-              [190, 150, 200], 
-              [190, 200, 150]]
+set_points = [[220, 220, 220],
+              [140, 180, 180], 
+              [190, 220, 220],
+              [210, 170, 220], 
+              [210, 220, 170]]
 
 T = 2
 
@@ -20,7 +20,7 @@ try:
             point_ind = int((t//T) % 5)
             commands_message.arm = True
             commands_message.mode = 11
-            commands_message.desired_position[:3] = set_points[point_ind]
+            commands_message.desired_position[:3] = set_points[point_ind] 
             publish("commands")
             t_upd = t
 

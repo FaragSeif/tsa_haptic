@@ -36,6 +36,7 @@ for plane in planes:
 
     # torques_norm = np.linalg.norm(data_dict[plane]['torques'], axis=1)
     # tensions_norm = np.linalg.norm(data_dict[plane]['tensions'], axis=1)
+    
     volume_m = data_dict[plane]['jac_m_vol']
     volume_d = data_dict[plane]['jac_d_vol']
     cond_m = data_dict[plane]['jac_m_cond']
